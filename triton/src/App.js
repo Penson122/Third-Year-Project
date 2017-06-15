@@ -11,7 +11,7 @@ class App extends Component {
           <h2>Triton</h2>
         </div>
         <p className="App-intro">
-          Climate Data plotting tool created by Jack Penson.
+          Climate Data plotting tool created by Jack Penson
         </p>
       </div>
     );
