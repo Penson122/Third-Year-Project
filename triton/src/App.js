@@ -1,10 +1,13 @@
 import React, { Component } from 'react';
-import logo from './logo.svg';
+
+//material UI themes
 import {green500, green700, grey400, deepPurple900, deepPurpleA700, deepPurpleA100} from 'material-ui/styles/colors';
-import {Tabs, Tab} from 'material-ui/Tabs';
 import MuiThemeProvider from 'material-ui/styles/MuiThemeProvider';
 import getMuiTheme from 'material-ui/styles/getMuiTheme';
-import AppBar from 'material-ui/AppBar';
+
+//ui components
+import Header from './components/Header'
+
 import './App.css';
 
 const muiTheme = getMuiTheme({
@@ -18,32 +21,11 @@ const muiTheme = getMuiTheme({
   }
 });
 
-const styles = {
-  appBar: {
-   flexWrap: 'wrap',
-  },
-  tabs: {
-   width: '50%',
-   paddingTop: '0.5ex',
-   paddingRight: '20%'
-  },
-};
-
-const Navigation = () => (
-  <Tabs style={styles.tabs}>
-    <Tab label="About" />
-    <Tab label="Graphs" />
-    <Tab label="Resources"/>
-  </Tabs>
-);
-
 class App extends Component {
   render() {
     return (
      <MuiThemeProvider muiTheme={muiTheme}>
-        <AppBar title="TRITON" style={styles.appBar} showMenuIconButton={false}>
-          <Navigation />
-        </AppBar>
+      <Header />
      </MuiThemeProvider>
     );
   }
