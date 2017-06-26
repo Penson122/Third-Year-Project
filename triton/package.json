@@ -3,6 +3,7 @@
   "version": "7.9.0",
   "private": true,
   "dependencies": {
+    "highcharts": "^5.0.12",
     "material-ui": "^0.18.3",
     "react": "15.6.0",
     "react-dom": "15.6.0",
