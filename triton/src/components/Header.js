@@ -28,7 +28,6 @@ const styles = {
 };
 
 const Navigation = () => (
-
   <Tabs style={styles.tabs}>
     <Tab label="About" containerElement={<Link to="/about" />}/>
     <Tab label="Examples" containerElement={<Link to="/examples" />}/>
