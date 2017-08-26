@@ -12,5 +12,5 @@ app.get('*', (req, res) => {
   res.sendFile(path.join(__dirname+'/triton/build/index.html'));
 });
 
-const port = process.env.PORT || 8000;
+const port = process.env.PORT || 3000;
 app.listen(port);
