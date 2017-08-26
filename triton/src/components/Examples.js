@@ -42,7 +42,7 @@ const config = {
 const Examples = () => (
   <div>
     <GlobalTemperaturesSmoothedCard />
-    <GlobalTemperatures />
+    
   </div>
 )
 
