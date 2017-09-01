@@ -3,9 +3,11 @@ const path = require('path');
 
 const app = express();
 
+const routes = require('./server/routes.js');
+
 app.use(express.static(path.join(__dirname, 'triton/build')));
 
-
+app.user('/', routes);
 
 //Serve babel compiled build of triton
 app.get('*', (req, res) => {
