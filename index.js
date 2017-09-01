@@ -7,12 +7,15 @@ const routes = require('./server/routes.js');
 
 app.use(express.static(path.join(__dirname, 'triton/build')));
 
-app.user('/', routes);
+app.use('/', routes);
 
-//Serve babel compiled build of triton
+// Serve babel compiled build of triton
 app.get('*', (req, res) => {
-  res.sendFile(path.join(__dirname+'/triton/build/index.html'));
+  res.sendFile(path.join(__dirname, '/triton/build/index.html'));
 });
 
 const port = process.env.PORT || 3000;
 app.listen(port);
+
+console.log('triton climate tool');
+console.log('listening on port : ' + port);
