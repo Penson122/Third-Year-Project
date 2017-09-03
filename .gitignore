@@ -2,7 +2,8 @@ node_modules
 
 triton/build
 
-scrapers/source
+scrapers/sources
+
 scrapers/processed
 
 .DS_Store
