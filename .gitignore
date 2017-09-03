@@ -2,4 +2,6 @@ node_modules
 
 triton/build
 
+scrapers/source
+
 .DS_Store
