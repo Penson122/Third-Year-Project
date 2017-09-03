@@ -3,5 +3,6 @@ node_modules
 triton/build
 
 scrapers/source
+scrapers/processed
 
 .DS_Store
