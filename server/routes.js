@@ -1,53 +1,19 @@
 const express = require('express');
 const router = express.Router();
 
-const checkYearMiddleWare = (req, res, next) => {
-  let message = { errors: [] };
-  let status;
-  if (req.fromYear !== undefined && req.toYear !== undefined) {
-    if (req.fromYear > req.toYear) {
-      status = 400;
-      message.errors.push('fromYear and toYear are out of order');
-    }
-    if (req.baseLineTo !== undefined && req.baseLineFrom !== undefined) {
-      if (req.baseLineFrom > req.baseLineTo) {
-        status = 400;
-        message.errors.push('baseLineTo and baseLineFrom are out of order');
-      }
-      if (req.baseLineFrom < req.fromYear) {
-        status = 400;
-        message.errors.push('baseLineFrom before fromYear');
-      }
-      if (req.baseLineTo > req.toYear) {
-        status = 400;
-        message.errors.push('baseLineTo is after toYear');
-      }
-    }
-  }
-  if (message.errors.length > 0) {
-    res.status(status).send(message);
-  } else {
-    next();
-  }
-};
+const util = require('./utils.js');
+const models = require('./models.js');
 
-const isPositiveInteger = (n) => {
-  return n % (!isNaN(parseFloat(n)) && ~~n >= 0) === 0;
-};
+// JSON API
+router.use(express.json());
 
 router.param('name', (req, res, next, name) => {
-  // check that the name is available in mongo`
-  // if(name not in model){
   req.name = name;
   next();
-  // } else {
-  //   res.status(400);
-  //   res.send({error: 'Name not valid'});
-  // }
 });
 
 router.param('fromYear', (req, res, next, fromYear) => {
-  if (isPositiveInteger(fromYear)) {
+  if (util.isPositiveInteger(fromYear)) {
     req.fromYear = parseInt(fromYear);
     next();
   } else {
@@ -56,7 +22,7 @@ router.param('fromYear', (req, res, next, fromYear) => {
 });
 
 router.param('toYear', (req, res, next, toYear) => {
-  if (isPositiveInteger(toYear)) {
+  if (util.isPositiveInteger(toYear)) {
     req.toYear = parseInt(toYear);
     next();
   } else {
@@ -65,7 +31,7 @@ router.param('toYear', (req, res, next, toYear) => {
 });
 
 router.param('baseLineTo', (req, res, next, baseLineTo) => {
-  if (isPositiveInteger(baseLineTo)) {
+  if (util.isPositiveInteger(baseLineTo)) {
     req.baseLineTo = parseInt(baseLineTo);
     next();
   } else {
@@ -74,7 +40,7 @@ router.param('baseLineTo', (req, res, next, baseLineTo) => {
 });
 
 router.param('baseLineFrom', (req, res, next, baseLineFrom) => {
-  if (isPositiveInteger(baseLineFrom)) {
+  if (util.isPositiveInteger(baseLineFrom)) {
     req.baseLineFrom = parseInt(baseLineFrom);
     next();
   } else {
@@ -82,36 +48,58 @@ router.param('baseLineFrom', (req, res, next, baseLineFrom) => {
   }
 });
 
-router.get('/api/observations/:name', (req, res, next) => {
-  res.send('/api/observations/' + req.name);
+router.get('/observations/:name', (req, res, next) => {
+  models.observation.findOne({ name : req.name }, (err, obs) => {
+    if (err) util.handleError({ status: 400, message: `No observation found for ${req.name}` });
+    else res.json(obs.data);
+  });
 });
 
-router.get('/api/observations/:name/:fromYear/:toYear', checkYearMiddleWare, (req, res, next) => {
-  res.send('/api/observations/' + req.name + '/' + req.fromYear + '/' + req.toYear);
+router.get('/observations/:name/:fromYear', (req, res, next) => {
+  models.observation.aggregate(
+    { $match : { name: req.name } },
+    { $unwind : '$data' },
+    { $match : { 'data.year': { $gte: req.fromYear } } },
+    (err, obs) => {
+      if (err) util.handleError({ status: 400, body: `No observation found for ${req.name}` });
+      else res.json(obs);
+    });
 });
 
-router.get('/api/observations/:name/:fromYear/:toYear/:baseLineFrom/:baseLineTo', checkYearMiddleWare, (req, res, next) => {
-  res.send('/api/observations/' + req.name + '/' +
+router.get('/observations/:name/:fromYear/:toYear', util.checkYear, (req, res, next) => {
+  models.observation.aggregate(
+    { $match: { name: req.name } },
+    { $unwind: '$data' },
+    { $match: { 'data.year': { $gte : req.fromYear, $lte: req.toYear } } },
+    (err, obs) => {
+      if (err) util.handleError({ status: 400, body: `No observation found for ${req.name}` });
+      else res.json(obs);
+    });
+});
+
+router.get('/observations/:name/:fromYear/:toYear/:baseLineFrom/:baseLineTo', util.checkYear, (req, res, next) => {
+  res.send('/observations/' + req.name + '/' +
     req.fromYear + '/' +
     req.toYear + '/' +
     req.baseLineFrom + '/' +
     req.baseLineTo);
 });
 
-router.get('/api/model/:name/', (req, res, next) => {
-  res.send('/api/model/' + req.name);
+router.get('/model/:name', (req, res, next) => {
+  res.send('/model/' + req.name);
 });
 
-router.get('/api/model:name/:fromYear/:toYear', checkYearMiddleWare, (req, res, next) => {
-  res.send('/api/model/' + req.name + '/' + req.fromYear + '/' + req.toYear);
+router.get('/model:name/:fromYear/:toYear', util.checkYear, (req, res, next) => {
+  res.send('/model/' + req.name + '/' + req.fromYear + '/' + req.toYear);
 });
 
-router.get('/api/model/:name/:fromYear/:toYear', checkYearMiddleWare, (req, res, next) => {
-  res.send('/api/model/' + req.name + '/' + req.fromYear + '/' + req.toYear);
+router.get('/model/:name/:fromYear/:toYear', util.checkYear, (req, res, next) => {
+  res.send('/model/' + req.name + '/' + req.fromYear + '/' + req.toYear);
 });
 
-router.get('/api/model/:name/:fromYear/:toYear/:baseLineFrom/:baseLineTo', checkYearMiddleWare, (req, res, next) => {
-  res.send('/api/model/' + req.name + '/' + req.fromYear + '/' + req.toYear + '/' + req.baseLineFrom + '/' + req.baseLineTo);
+router.get('/model/:name/:fromYear/:toYear/:baseLineFrom/:baseLineTo', util.checkYear, (req, res, next) => {
+  // eslint-disable-next-line max-len
+  res.send('/model/' + req.name + '/' + req.fromYear + '/' + req.toYear + '/' + req.baseLineFrom + '/' + req.baseLineTo);
 });
 
 module.exports = router;

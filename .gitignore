@@ -9,3 +9,4 @@ scrapers/processed
 report
 
 .DS_Store
+.env

@@ -8,7 +8,7 @@ import FlatButton from 'material-ui/FlatButton';
 HighchartsMore(ReactHighcharts.Highcharts);
 
 const HadCRUT4 = require('./../data/HadCRUT4.json');
-const HadCRUT4Months = require('./../data/HadCRUT4.months.json');
+// const HadCRUT4Months = require('./../data/HadCRUT4.months.json');
 
 const styles = {
   card: {
@@ -42,69 +42,8 @@ const config = {
 const Examples = () => (
   <div>
     <GlobalTemperaturesSmoothedCard />
-
   </div>
 );
-
-class GlobalTemperatures extends React.Component {
-  constructor (props) {
-    super(props);
-    this.state = JSON.parse(JSON.stringify(config));
-  }
-  componentDidMount () {
-    this.getMeans();
-  }
-
-  getMeans () {
-    const monthlyAverages = HadCRUT4Months.map((e, i) => {
-      let temp = [];
-      Object.entries(e).forEach(([key, value]) => {
-        let year = key;
-        Object.entries(value).forEach(([month, data]) => {
-          let UTCDate = Date.UTC(year, month);
-          temp.push([UTCDate, data[0]]);
-        });
-      });
-      return temp;
-    });
-    console.log('Monthly Dataset');
-    console.log(HadCRUT4Months);
-    return monthlyAverages;
-  }
-
-  // getMeans(){
-  //   let means = HadCRUT4.map((e, i) => {
-  //     let temp = [];
-  //     temp.push(Date.UTC(e.date, 0, 1));
-  //     temp.push(e.data[0]);
-  //     return temp;
-  //   });
-  //   return means;
-  // }
-
-  getRanges () {
-
-  }
-
-  render () {
-    return (
-      <Card style={styles.card}>
-        <CardTitle title='Global Average Temperature' subtitle='HadCRUT4 Decadally Smoothed' />
-        <CardMedia>
-          <ReactHighcharts config={this.state} />
-        </CardMedia>
-        <CardText>
-          The HadCRUT4 near surface temperature data set is produced by blending data from the CRUTEM4 surface air temperature dataset and the HadSST3 sea-surface temperature dataset.
-          These 'best estimate' series are computed as the medians of regional time series computed for each of the 100 ensemble member realisations.
-          Time series are presented as temperature anomalies (deg C) relative to 1961-1990.
-        </CardText>
-        <CardActions>
-          <FlatButton label='Source' href='http://www.metoffice.gov.uk/hadobs/hadcrut4/data/current/download.html' />
-        </CardActions>
-      </Card>
-    );
-  }
-}
 
 class GlobalTemperaturesSmoothedCard extends React.Component {
   constructor (props) {
@@ -182,4 +121,65 @@ class GlobalTemperaturesSmoothedCard extends React.Component {
     );
   }
 }
+
+// class GlobalTemperatures extends React.Component {
+//   constructor (props) {
+//     super(props);
+//     this.state = JSON.parse(JSON.stringify(config));
+//   }
+//   componentDidMount () {
+//     this.getMeans();
+//   }
+
+//   getMeans () {
+//     const monthlyAverages = HadCRUT4Months.map((e, i) => {
+//       let temp = [];
+//       Object.entries(e).forEach(([key, value]) => {
+//         let year = key;
+//         Object.entries(value).forEach(([month, data]) => {
+//           let UTCDate = Date.UTC(year, month);
+//           temp.push([UTCDate, data[0]]);
+//         });
+//       });
+//       return temp;
+//     });
+//     console.log('Monthly Dataset');
+//     console.log(HadCRUT4Months);
+//     return monthlyAverages;
+//   }
+
+//   // getMeans(){
+//   //   let means = HadCRUT4.map((e, i) => {
+//   //     let temp = [];
+//   //     temp.push(Date.UTC(e.date, 0, 1));
+//   //     temp.push(e.data[0]);
+//   //     return temp;
+//   //   });
+//   //   return means;
+//   // }
+
+//   getRanges () {
+
+//   }
+
+//   render () {
+//     return (
+//       <Card style={styles.card}>
+//         <CardTitle title='Global Average Temperature' subtitle='HadCRUT4 Decadally Smoothed' />
+//         <CardMedia>
+//           <ReactHighcharts config={this.state} />
+//         </CardMedia>
+//         <CardText>
+//           The HadCRUT4 near surface temperature data set is produced by blending data from the CRUTEM4 surface air temperature dataset and the HadSST3 sea-surface temperature dataset.
+//           These 'best estimate' series are computed as the medians of regional time series computed for each of the 100 ensemble member realisations.
+//           Time series are presented as temperature anomalies (deg C) relative to 1961-1990.
+//         </CardText>
+//         <CardActions>
+//           <FlatButton label='Source' href='http://www.metoffice.gov.uk/hadobs/hadcrut4/data/current/download.html' />
+//         </CardActions>
+//       </Card>
+//     );
+//   }
+// }
+
 export default Examples;
