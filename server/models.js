@@ -23,8 +23,22 @@ const observationSchema = new Schema({
   data: [observationDataSchema]
 });
 
+const modelDataSchema = new Schema({
+  year: Number,
+  ensembleNumber: Number,
+  mean: Number
+});
+
+const modelSchema = new Schema({
+  name: String,
+  data: [modelDataSchema]
+});
+
 const observationModel = mongoose.model('observations', observationSchema);
 
+const modelModel = mongoose.model('models', modelSchema);
+
 module.exports = {
-  observation: observationModel
+  observation: observationModel,
+  model: modelModel
 };

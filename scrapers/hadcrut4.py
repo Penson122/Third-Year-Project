@@ -1,20 +1,11 @@
 import json
+import cli
 
-from optparse import OptionParser
-
-parser = OptionParser()
-parser.add_option("-f", "--file", dest="source",
-                  help="read from FILE", metavar="FILE")
-parser.add_option("-o", "--output-file", metavar="OUTPUT_FILE",
-                  dest="outputFile", default="hadcrut4.json",
-                  help="write to OUTPUT_FILE")
-parser.add_option("-v", "--verbose", dest="verbose", default=False, help="Print to stdout", action="store_true")
-
-(options, args) = parser.parse_args()
+(options, args) = cli.getOptions()
 
 hadcrut4 = open(options.source, "r")
 output = {}
-output['name'] = 'hadcrut4'
+output['name'] = options.name
 hadcrutData = []
 output['data'] = hadcrutData
 for line in hadcrut4.readlines():
@@ -22,8 +13,9 @@ for line in hadcrut4.readlines():
     data = line.split()
     yearMonth = data[0].split('/')
     year = int(yearMonth[0])
-    month = int(yearMonth[1])
-    currentMonth['month'] = month
+    if(len(yearMonth) == 2):
+        month = int(yearMonth[1])
+        currentMonth['month'] = month
     currentMonth['year'] = year
     currentMonth['mean'] = float(data[1])
     currentMonth['lowerBoundBias'] = float(data[2])
@@ -38,8 +30,9 @@ for line in hadcrut4.readlines():
     currentMonth['upperBoundCombinedAll'] = float(data[11])
     hadcrutData.append(currentMonth)
 
-with open(options.outputFile, 'w') as outfile:
-    json.dump(output, outfile, indent=2)
+if(options.outputFile):
+    with open(options.outputFile, 'w') as outfile:
+        json.dump(output, outfile, indent=2)
 
 if(options.verbose):
     print(json.dumps(output, indent=2))

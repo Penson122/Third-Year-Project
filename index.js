@@ -26,9 +26,13 @@ mongoose.connect(DB_URI, { useMongoClient: true }, (err, res) => {
     console.error(err);
     process.exit(1);
   } else {
-    console.log('connected to database');
-    console.log('triton climate tool');
-    console.log('listening on port : ' + port);
+    if (process.env.NODE_ENV !== 'test') {
+      console.log('connected to database');
+      console.log('triton climate tool');
+      console.log('listening on port : ' + port);
+    }
     app.listen(port);
   }
 });
+
+module.exports = { App: app };

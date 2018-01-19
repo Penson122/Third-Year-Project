@@ -51,7 +51,8 @@ router.param('baseLineFrom', (req, res, next, baseLineFrom) => {
 router.get('/observations/:name', (req, res, next) => {
   models.observation.findOne({ name : req.name }, (err, obs) => {
     if (err) util.handleError({ status: 400, message: `No observation found for ${req.name}` });
-    else res.json(obs.data);
+    if (obs) res.json(obs.data);
+    else res.json([]);
   });
 });
 
@@ -62,7 +63,7 @@ router.get('/observations/:name/:fromYear', (req, res, next) => {
     { $match : { 'data.year': { $gte: req.fromYear } } },
     (err, obs) => {
       if (err) util.handleError({ status: 400, body: `No observation found for ${req.name}` });
-      else res.json(obs);
+      else res.json(obs.map((e) => e.data));
     });
 });
 
@@ -73,7 +74,7 @@ router.get('/observations/:name/:fromYear/:toYear', util.checkYear, (req, res, n
     { $match: { 'data.year': { $gte : req.fromYear, $lte: req.toYear } } },
     (err, obs) => {
       if (err) util.handleError({ status: 400, body: `No observation found for ${req.name}` });
-      else res.json(obs);
+      else res.json(obs.map((e) => e.data));
     });
 });
 
@@ -85,16 +86,34 @@ router.get('/observations/:name/:fromYear/:toYear/:baseLineFrom/:baseLineTo', ut
     req.baseLineTo);
 });
 
-router.get('/model/:name', (req, res, next) => {
-  res.send('/model/' + req.name);
+router.get('/models/:name', (req, res, next) => {
+  models.model.findOne({ name: req.name }, (err, obs) => {
+    if (err) util.handleError({ status: 400, message: `No model found for ${req.name}` });
+    if (obs) res.json(obs.data);
+    else res.json([]);
+  });
 });
 
-router.get('/model:name/:fromYear/:toYear', util.checkYear, (req, res, next) => {
-  res.send('/model/' + req.name + '/' + req.fromYear + '/' + req.toYear);
+router.get('/models/:name/:fromYear', (req, res, next) => {
+  models.model.aggregate(
+    { $match : { name: req.name } },
+    { $unwind : '$data' },
+    { $match : { 'data.year': { $gte: req.fromYear } } },
+    (err, mod) => {
+      if (err) util.handleError({ status: 400, body: `No observation found for ${req.name}` });
+      else res.json(mod);
+    });
 });
 
-router.get('/model/:name/:fromYear/:toYear', util.checkYear, (req, res, next) => {
-  res.send('/model/' + req.name + '/' + req.fromYear + '/' + req.toYear);
+router.get('/models/:name/:fromYear/:toYear', util.checkYear, (req, res, next) => {
+  models.model.aggregate(
+    { $match: { name: req.name } },
+    { $unwind: '$data' },
+    { $match: { 'data.year': { $gte : req.fromYear, $lte: req.toYear } } },
+    (err, mod) => {
+      if (err) util.handleError({ status: 400, body: `No observation found for ${req.name}` });
+      else res.json(mod);
+    });
 });
 
 router.get('/model/:name/:fromYear/:toYear/:baseLineFrom/:baseLineTo', util.checkYear, (req, res, next) => {
