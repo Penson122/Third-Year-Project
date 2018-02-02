@@ -1,3 +1,13 @@
 node_modules
+
 triton/build
+
+scrapers/sources
+
+scrapers/processed
+
+report
+
 .DS_Store
+.env
+__pycache__
