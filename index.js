@@ -1,15 +1,23 @@
-const express = require('express');
 const path = require('path');
+const express = require('express');
+const morgan = require('morgan');
 const mongoose = require('mongoose');
+const routes = require('./server/routes.js');
 require('dotenv').config();
 
 const app = express();
-const routes = require('./server/routes.js');
+app.use(morgan('dev'));
 
 const DB_URI = process.env.MONGODB_URI;
-const port = process.env.PORT || 3000;
+const port = process.env.PORT || 5000;
 
 app.use(express.static(path.join(__dirname, 'triton/build')));
+
+app.use((req, res, next) => {
+  res.header('Access-Control-Allow-Origin', '*');
+  res.header('Access-Control-Allow-Headers', 'Origin, X-Requested-With, Content-Type, Accept');
+  next();
+});
 
 app.use('/api', routes);
 

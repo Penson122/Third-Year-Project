@@ -79,11 +79,18 @@ router.get('/observations/:name/:fromYear/:toYear', util.checkYear, (req, res, n
 });
 
 router.get('/observations/:name/:fromYear/:toYear/:baseLineFrom/:baseLineTo', util.checkYear, (req, res, next) => {
-  res.send('/observations/' + req.name + '/' +
-    req.fromYear + '/' +
-    req.toYear + '/' +
-    req.baseLineFrom + '/' +
-    req.baseLineTo);
+  models.observation.aggregate(
+    { $match: { name: req.name } },
+    { $unwind: '$data' },
+    { $match: { 'data.year': { $gte : req.fromYear, $lte: req.toYear } } },
+    (err, obs) => {
+      if (err) util.handleError({ status: 400, body: `No observation found for ${req.name}` });
+      else {
+        const formatted = obs.map(o => o.data);
+        const result = observationBaseline(req.baseLineFrom, req.baseLineTo, formatted);
+        res.json(formatted);
+      }
+    });
 });
 
 router.get('/models/:name', (req, res, next) => {
@@ -101,24 +108,97 @@ router.get('/models/:name/:fromYear', (req, res, next) => {
     { $match : { 'data.year': { $gte: req.fromYear } } },
     (err, mod) => {
       if (err) util.handleError({ status: 400, body: `No observation found for ${req.name}` });
-      else res.json(mod);
+      else res.json(mod.map((e) => e.data));
     });
 });
 
 router.get('/models/:name/:fromYear/:toYear', util.checkYear, (req, res, next) => {
+  const upperBound = req.query.upperBound;
+  const lowerBound = req.query.lowerBound;
   models.model.aggregate(
     { $match: { name: req.name } },
     { $unwind: '$data' },
     { $match: { 'data.year': { $gte : req.fromYear, $lte: req.toYear } } },
     (err, mod) => {
-      if (err) util.handleError({ status: 400, body: `No observation found for ${req.name}` });
-      else res.json(mod);
+      if (err) util.handleError({ status: 400, body: `No model found for ${req.name}` });
+      else {
+        const formatted = mod.map(m => m.data);
+        const result = getBounds(upperBound, lowerBound, formatted);
+        res.json(result);
+      }
     });
 });
 
-router.get('/model/:name/:fromYear/:toYear/:baseLineFrom/:baseLineTo', util.checkYear, (req, res, next) => {
-  // eslint-disable-next-line max-len
-  res.send('/model/' + req.name + '/' + req.fromYear + '/' + req.toYear + '/' + req.baseLineFrom + '/' + req.baseLineTo);
+router.get('/models/:name/:fromYear/:toYear/:baseLineFrom/:baseLineTo', util.checkYear, (req, res, next) => {
+  const upperBound = req.query.upperBound;
+  const lowerBound = req.query.lowerBound;
+  models.model.aggregate(
+    { $match: { name: req.name } },
+    { $unwind: '$data' },
+    { $match: { 'data.year': { $gte : req.fromYear, $lte: req.toYear } } },
+    (err, mod) => {
+      if (err) util.handleError({ status: 400, body: `No model found for ${req.name}` });
+      else {
+        const formatted = mod.map(m => m.data);
+        const baselined = modelBaseline(req.baseLineFrom, req.baseLineTo, formatted);
+        const result = getBounds(upperBound, lowerBound, baselined);
+        res.json(result);
+      }
+    });
 });
+
+const modelBaseline = (from, to, data) => {
+  const total = data.reduce((acc, cur) => {
+    if (cur.year >= from && cur.year <= to) {
+      const yearTotal = cur.data.reduce((acc, cur) => acc + cur.mean, 0);
+      const yearAverage = yearTotal / cur.data.length;
+      acc += yearAverage;
+    }
+    return acc;
+  }, 0);
+  const average = total / Math.abs(from - to);
+  return data.map(d => {
+    d.data = d.data.map(p => {
+      p.mean -= average;
+      return p;
+    });
+    return d;
+  });
+};
+
+const observationBaseline = (from, to, data) => {
+  const total = data.reduce((acc, cur) => {
+    if (cur.year >= from && cur.year <= to) {
+      acc += cur.mean;
+    }
+    return acc;
+  }, 0);
+  const average = total / Math.abs(from - to);
+  return data.map(d => {
+    d.mean -= average;
+    return d;
+  });
+};
+
+const getBounds = (upperBound, lowerBound, data) => {
+  let result = data;
+  if (upperBound <= 100 && lowerBound > 0) {
+    result = result.map(m => {
+      m.data = m.data.sort((a, b) => a.mean - b.mean);
+      let max, min;
+      if (upperBound) {
+        max = m.data[Math.floor(m.data.length * (upperBound / 100))];
+      }
+      if (lowerBound) {
+        min = m.data[Math.floor(m.data.length * (lowerBound / 100))];
+      }
+      if (!!max && !!min) {
+        m.data = [min, max];
+      }
+      return m;
+    });
+  }
+  return result;
+};
 
 module.exports = router;

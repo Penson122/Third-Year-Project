@@ -25,8 +25,10 @@ const observationSchema = new Schema({
 
 const modelDataSchema = new Schema({
   year: Number,
-  ensembleNumber: Number,
-  mean: Number
+  data: [{
+    ensembleNumber: Number,
+    mean: Number
+  }]
 });
 
 const modelSchema = new Schema({

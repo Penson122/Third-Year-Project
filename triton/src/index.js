@@ -7,6 +7,6 @@ import registerServiceWorker from './registerServiceWorker';
 import './index.css';
 
 injectTapEventPlugin();
-
+console.log('welcome to triton climate tools');
 ReactDOM.render(<App />, document.getElementById('root'));
 registerServiceWorker();

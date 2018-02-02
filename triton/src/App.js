@@ -1,12 +1,12 @@
 import React, { Component } from 'react';
 
-//material UI themes
-import {green500, green700, grey400, yellowA200, yellow300, yellowA400} from 'material-ui/styles/colors';
+// material UI themes
+import { green500, green700, grey400, yellowA200, yellow300, yellowA400 } from 'material-ui/styles/colors';
 import MuiThemeProvider from 'material-ui/styles/MuiThemeProvider';
 import getMuiTheme from 'material-ui/styles/getMuiTheme';
 
-//ui components
-import Header from './components/Header'
+// ui components
+import Header from './components/Header';
 
 import './App.css';
 
@@ -22,11 +22,11 @@ const muiTheme = getMuiTheme({
 });
 
 class App extends Component {
-  render() {
+  render () {
     return (
-     <MuiThemeProvider muiTheme={muiTheme}>
-      <Header />
-     </MuiThemeProvider>
+      <MuiThemeProvider muiTheme={muiTheme}>
+        <Header />
+      </MuiThemeProvider>
     );
   }
 }
