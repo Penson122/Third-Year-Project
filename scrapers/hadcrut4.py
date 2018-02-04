@@ -32,7 +32,7 @@ for line in hadcrut4.readlines():
 
 if(options.outputFile):
     with open(options.outputFile, 'w') as outfile:
-        json.dump(output, outfile, indent=2)
+        json.dump(output, outfile)
 
 if(options.verbose):
     print(json.dumps(output, indent=2))
