@@ -22,13 +22,11 @@ const config = {
     formatter: function () {
       var s = '<b>' + new Date(this.x).getFullYear() + '</b>';
       this.points.forEach((x) => {
-        s += '<br/>' + x.series.name + ': ' + `<b>${x.y.toFixed(3)}</b>` + '°C';
+        s += `<br/>${x.series.name}: <b>${x.y.toFixed(3)}</b>°C`;
       });
-
       return s;
     },
-    shared: true,
-    // valueSuffix: '°C'
+    shared: true
   },
   xAxis: {
     type: 'datetime'
@@ -45,15 +43,18 @@ const Examples = () => (
 class GlobalTemperaturesSmoothedCard extends React.Component {
   async componentWillMount () {
     let hadCrutMeans;
+    let cowtanMeans;
     let modelMeans;
     try {
       let hadcrut = await fetch('/api/observations/hadcrut4Annual/1960/2020/1961/1999');
+      let cowtan = await fetch('/api/observations/cowtan/1960/2020/1961/1999');
+      cowtan = await cowtan.json();
       hadcrut = await hadcrut.json();
-      const modelMax = hadcrut[hadcrut.length - 1].year;
-      let cmip = await fetch(`/api/models/cmip3/1960/${modelMax}/1961/1999?lowerBound=5&upperBound=95`);
+      let cmip = await fetch(`/api/models/cmip3/1960/2030/1961/1999?lowerBound=5&upperBound=95`);
       cmip = await cmip.json();
       modelMeans = cmip.map(m => [Date.UTC(m.year), m.data[0].mean, m.data[1].mean]);
       hadCrutMeans = hadcrut.map(h => [Date.UTC(h.year), h.mean]);
+      cowtanMeans = cowtan.map(c => [Date.UTC(c.year), c.mean]);
     } catch (e) {
       console.error('failed to load resource hadcrut');
     }
@@ -70,6 +71,10 @@ class GlobalTemperaturesSmoothedCard extends React.Component {
         name: 'HadCRUT4 Surface Air Tempurature',
         type: 'line',
         data: hadCrutMeans
+      }, {
+        name: 'Cowtan and Waye Surface Air Temperature',
+        type: 'line',
+        data: cowtanMeans
       }, {
         name: 'CMIP3 Estimated Tempuratures',
         type: 'arearange',
