@@ -7,7 +7,7 @@ import cli
 cmip3 = open(options.source, "r")
 cmipData = []
 output = {
-    "name": "cmip3",
+    "name": options.name,
     "data": cmipData
 }
 ensembleRegex = r'ensemble member\s+'
@@ -30,9 +30,19 @@ for line in cmip3.readlines():
         }
         cmipData.append(current)
 
+formattedData = []
+for item in cmipData:
+    found = list(filter(lambda x: x['year'] == item['year'], formattedData))
+    if(len(found) == 0):
+        formattedData.append({ "year": item['year'], "data": [{ "ensembleNumber": item['ensembleNumber'], "mean": item['mean'] }] })
+    else:
+        found[0]['data'].append({ "ensembleNumber": item['ensembleNumber'], "mean": item['mean'] })
+
+output['data'] = formattedData
+
 if(options.outputFile):
     with open(options.outputFile, 'w') as outfile:
-        json.dump(output, outfile, indent=2)
+        json.dump(output, outfile)
 
 if(options.verbose):
     print(json.dumps(output, indent=2))
