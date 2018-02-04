@@ -1,5 +1,4 @@
 import React from 'react';
-import Highcharts from 'highcharts';
 import HighchartsMore from 'highcharts-more';
 import ReactHighcharts from 'react-highcharts';
 import { Card, CardActions, CardMedia, CardTitle, CardText } from 'material-ui/Card';
@@ -9,7 +8,7 @@ HighchartsMore(ReactHighcharts.Highcharts);
 
 const styles = {
   card: {
-    margin: '1% 10%',
+    margin: '1% 3%',
   }
 };
 
@@ -33,31 +32,54 @@ const config = {
   }
 };
 
+const lineMap = m => [Date.UTC(m.year), m.mean];
+const areaMap = m => [Date.UTC(m.year), m.data[0].mean, m.data[1].mean];
+
+const getDataset = async (url, mapper) => {
+  let dataset = await fetch(url);
+  dataset = await dataset.json();
+  return dataset.map(mapper);
+};
+
 const Examples = () => (
   <div style={{ width: '100%', height: '100vh' }}>
     <h2 style={{ textAlign: 'center', verticalAlign: 'middle' }}>Examples coming soon!</h2>
-    <GlobalTemperaturesSmoothedCard />
+    <div style={{ float: 'left', width: '50vw' }}>
+      <GlobalTemperaturesSmoothedCard
+        title='Global Average Temperatures Smoothed'
+        subtitle='Comparison of model estimates and surface air temperatures'
+        text='Baseline period of 1961-1999'
+        observationPeriod='1960/2020/1961/1999'
+        modelPeriod='1960/2030/1961/1999' />
+    </div>
+    <div style={{ float: 'right', width: '50vw' }}>
+      <GlobalTemperaturesSmoothedCard
+        title='Global Average Temperatures Smoothed'
+        subtitle='The effect of baselining on model estimates'
+        text='Baseline period of 1998-1999'
+        observationPeriod='1960/2020/1989/1999'
+        modelPeriod='1960/2030/1998/1999' />
+    </div>
   </div>
 );
 
 class GlobalTemperaturesSmoothedCard extends React.Component {
+  constructor (props) {
+    super(props);
+    const { observationPeriod, modelPeriod } = props;
+    console.log(observationPeriod);
+    this.state = {
+      observationPeriod,
+      modelPeriod,
+      chart: {}
+    };
+  }
   async componentWillMount () {
-    let hadCrutMeans;
-    let cowtanMeans;
-    let modelMeans;
-    try {
-      let hadcrut = await fetch('/api/observations/hadcrut4Annual/1960/2020/1961/1999');
-      let cowtan = await fetch('/api/observations/cowtan/1960/2020/1961/1999');
-      cowtan = await cowtan.json();
-      hadcrut = await hadcrut.json();
-      let cmip = await fetch(`/api/models/cmip3/1960/2030/1961/1999?lowerBound=5&upperBound=95`);
-      cmip = await cmip.json();
-      modelMeans = cmip.map(m => [Date.UTC(m.year), m.data[0].mean, m.data[1].mean]);
-      hadCrutMeans = hadcrut.map(h => [Date.UTC(h.year), h.mean]);
-      cowtanMeans = cowtan.map(c => [Date.UTC(c.year), c.mean]);
-    } catch (e) {
-      console.error('failed to load resource hadcrut');
-    }
+    let hadCrutMeans = await getDataset(`/api/observations/hadcrut4Annual/${this.props.observationPeriod}`, lineMap);
+    let cowtanMeans = await getDataset(`/api/observations/cowtan/${this.props.observationPeriod}`, lineMap);
+    let modelMeans =
+      await getDataset(`/api/models/cmip3/${this.props.modelPeriod}?lowerBound=5&upperBound=95`, areaMap);
+    let gistempMeans = await getDataset(`/api/observations/gistemp/${this.props.observationPeriod}`, lineMap);
     const chartState = {
       title: {
         text: 'Global Temperature in relative degrees celsius'
@@ -65,9 +87,20 @@ class GlobalTemperaturesSmoothedCard extends React.Component {
       yAxis: {
         title: {
           text: 'Global Surface Air Tempurature'
-        }
+        },
+        tickInterval: 0.2
       },
       series: [{
+        name: 'CMIP3 Estimated Tempuratures',
+        type: 'arearange',
+        data: modelMeans,
+        lineWidth: 0.5,
+        fillOpacity: 0.2,
+        zIndex: 0,
+        marker: {
+          enabled: false
+        }
+      }, {
         name: 'HadCRUT4 Surface Air Tempurature',
         type: 'line',
         data: hadCrutMeans
@@ -76,33 +109,24 @@ class GlobalTemperaturesSmoothedCard extends React.Component {
         type: 'line',
         data: cowtanMeans
       }, {
-        name: 'CMIP3 Estimated Tempuratures',
-        type: 'arearange',
-        data: modelMeans,
-        lineWidth: 0,
-        color: Highcharts.getOptions().colors[2],
-        fillOpacity: 0.3,
-        zIndex: 0,
-        marker: {
-          enabled: false
-        }
+        name: 'GISTEMP Surface Air Temperature',
+        type: 'line',
+        data: gistempMeans
       }],
       ...config
     };
-    this.setState(chartState);
+    this.setState({ chart: chartState });
   }
 
   render () {
     return (
       <Card style={styles.card}>
-        <CardTitle title='Global Average Temperature' subtitle='HadCRUT4 Decadally Smoothed' />
+        <CardTitle title={this.props.title} subtitle={this.props.subtitle} />
         <CardMedia>
-          <ReactHighcharts config={this.state ? this.state : {}} />
+          <ReactHighcharts config={this.state.chart} isPureConfig />
         </CardMedia>
         <CardText>
-          The HadCRUT4 near surface temperature data set is produced by blending data from the CRUTEM4 surface air temperature dataset and the HadSST3 sea-surface temperature dataset.
-          These 'best estimate' series are computed as the medians of regional time series computed for each of the 100 ensemble member realisations.
-          Time series are presented as temperature anomalies (deg C) relative to 1961-1990.
+          { this.props.text }
         </CardText>
         <CardActions>
           <FlatButton label='Source' href='http://www.metoffice.gov.uk/hadobs/hadcrut4/data/current/download.html' />

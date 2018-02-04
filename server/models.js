@@ -3,9 +3,9 @@ const mongoose = require('mongoose');
 const Schema = mongoose.Schema;
 
 const observationDataSchema = new Schema({
-  year: Number,
+  year: { type: Number, required: true },
   month: Number,
-  mean: Number,
+  mean: { type: Number, required: true },
   totalUncertainty: Number,
   coverageUncertainty: Number,
   ensembleUncertainty: Number,
@@ -30,7 +30,7 @@ const modelDataSchema = new Schema({
   year: Number,
   data: [{
     ensembleNumber: Number,
-    mean: Number
+    mean: { type: Number, required: true }
   }]
 });
 
