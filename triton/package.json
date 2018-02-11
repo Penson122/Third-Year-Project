@@ -3,19 +3,21 @@
   "version": "7.9.0",
   "private": true,
   "dependencies": {
-    "highcharts": "^5.0.12",
-    "highcharts-more": "^0.1.2",
-    "material-ui": "^0.18.3",
-    "netcdfjs": "^0.3.1",
-    "react": "^15.6.0",
-    "react-dom": "15.6.0",
+    "google-palette": "^1.0.0",
+    "material-ui": "^0.20.0",
+    "react": "16.2.0",
+    "react-dom": "16.2.0",
     "react-highcharts": "^12.0.0",
     "react-router-dom": "^4.1.1",
-    "react-tap-event-plugin": "^2.0.1"
+    "react-style-proptype": "^3.2.0",
+    "recharts": "^1.0.0-beta.10"
   },
   "proxy": "http://localhost:5000",
   "devDependencies": {
-    "react-scripts": "1.0.7"
+    "enzyme": "^3.3.0",
+    "enzyme-adapter-react-16": "^1.1.1",
+    "jest-enzyme": "^4.2.0",
+    "react-scripts": "1.1.1"
   },
   "scripts": {
     "start": "react-scripts start",
