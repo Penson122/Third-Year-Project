@@ -8,33 +8,9 @@ const styles = {
   }
 };
 
-const config = {
-  credits: {
-    enabled: false
-  },
-  tooltip: {
-    crosshairs: true,
-    formatter: function () {
-      var s = '<b>' + new Date(this.x).getFullYear() + '</b>';
-      this.points.forEach((x) => {
-        s += `<br/>${x.series.name}: <b>${x.y.toFixed(3)}</b>°C`;
-      });
-      return s;
-    },
-    shared: true
-  },
-  xAxis: {
-    type: 'datetime'
-  }
-};
-
-const lineMap = m => [Date.UTC(m.year), m.mean];
-const areaMap = m => [Date.UTC(m.year), m.data[0].mean, m.data[1].mean];
-
-const getDataset = async (url, mapper) => {
+const getDataset = async (url) => {
   let dataset = await fetch(url);
-  dataset = await dataset.json();
-  return dataset.map(mapper);
+  return dataset.json();
 };
 
 const Examples = () => (
@@ -62,51 +38,32 @@ class ExampleGraph extends React.Component {
   constructor (props) {
     super(props);
     this.state = {
-      chart: {}
+      chart: {
+        minHeight: '40vh',
+        xAxisKey: 'year',
+        seriesDetails: [
+          { name: 'CMIP3', key: 'range' },
+          { name: 'HadCRUT4', key: 'hadcrutMean' },
+          { name: 'Cowtan and Way', key: 'cowtanMean' },
+          { name: 'GISTEMP', key: 'gistempMean' }]
+      }
     };
   }
   async componentWillMount () {
-    let hadCrutMeans = await getDataset(`/api/observations/hadcrut4Annual/${this.props.observationPeriod}`, lineMap);
-    let cowtanMeans = await getDataset(`/api/observations/cowtan/${this.props.observationPeriod}`, lineMap);
+    let hadCrutMeans = await getDataset(`/api/observations/hadcrut4Annual/${this.props.observationPeriod}`);
+    let cowtanMeans = await getDataset(`/api/observations/cowtan/${this.props.observationPeriod}`);
     let modelMeans =
-      await getDataset(`/api/models/cmip3/${this.props.modelPeriod}?lowerBound=5&upperBound=95`, areaMap);
-    let gistempMeans = await getDataset(`/api/observations/gistemp/${this.props.observationPeriod}`, lineMap);
-    const chartState = {
-      title: {
-        text: 'Global Temperature in relative degrees celsius'
-      },
-      yAxis: {
-        title: {
-          text: 'Global Surface Air Tempurature'
-        },
-        tickInterval: 0.2
-      },
-      series: [{
-        name: 'CMIP3 Estimated Tempuratures',
-        type: 'arearange',
-        data: modelMeans,
-        lineWidth: 0.5,
-        fillOpacity: 0.2,
-        zIndex: 0,
-        marker: {
-          enabled: false
-        }
-      }, {
-        name: 'HadCRUT4 Surface Air Tempurature',
-        type: 'line',
-        data: hadCrutMeans
-      }, {
-        name: 'Cowtan and Waye Surface Air Temperature',
-        type: 'line',
-        data: cowtanMeans
-      }, {
-        name: 'GISTEMP Surface Air Temperature',
-        type: 'line',
-        data: gistempMeans
-      }],
-      ...config
-    };
-    this.setState({ chart: chartState });
+      await getDataset(`/api/models/cmip3/${this.props.modelPeriod}?lowerBound=5&upperBound=95`);
+    let gistempMeans = await getDataset(`/api/observations/gistemp/${this.props.observationPeriod}`);
+    const series = modelMeans.map((x, i) => {
+      let res = ({ year: x.year, range: [x.data[0].mean, x.data[1].mean] });
+      return Object.assign(res, hadCrutMeans[i] && {
+        hadcrutMean: hadCrutMeans[i].mean,
+        cowtanMean: cowtanMeans[i].mean,
+        gistempMean: gistempMeans[i].mean
+      });
+    });
+    this.setState({ series: series });
   }
 
   render () {
@@ -116,6 +73,7 @@ class ExampleGraph extends React.Component {
         title={this.props.title}
         subtitle={this.props.subtitle}
         config={this.state.chart}
+        series={this.state.series}
         description={this.props.text}
       />
     );
