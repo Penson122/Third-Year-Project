@@ -50,9 +50,9 @@ router.param('baseLineFrom', (req, res, next, baseLineFrom) => {
 
 router.get('/observations/:name', (req, res, next) => {
   models.observation.findOne({ name : req.name }, (err, obs) => {
-    if (err) util.handleError({ status: 400, message: `No observation found for ${req.name}` });
+    if (err) util.handleError({ status: 400, message: `Error reading from database` });
     if (obs) res.json(obs.data);
-    else res.json([]);
+    else util.handleError({ status: 400, body: `No observation found for ${req.name}` }, res);
   });
 });
 
@@ -62,7 +62,7 @@ router.get('/observations/:name/:fromYear', (req, res, next) => {
     { $unwind : '$data' },
     { $match : { 'data.year': { $gte: req.fromYear } } },
     (err, obs) => {
-      if (err) util.handleError({ status: 400, body: `No observation found for ${req.name}` });
+      if (err) util.handleError({ status: 400, body: `No observation found for ${req.name}` }, res);
       else res.json(obs.map((e) => e.data));
     });
 });
@@ -73,7 +73,7 @@ router.get('/observations/:name/:fromYear/:toYear', util.checkYear, (req, res, n
     { $unwind: '$data' },
     { $match: { 'data.year': { $gte : req.fromYear, $lte: req.toYear } } },
     (err, obs) => {
-      if (err) util.handleError({ status: 400, body: `No observation found for ${req.name}` });
+      if (err) util.handleError({ status: 400, body: `No observation found for ${req.name}` }, res);
       else res.json(obs.map((e) => e.data));
     });
 });
@@ -84,20 +84,20 @@ router.get('/observations/:name/:fromYear/:toYear/:baseLineFrom/:baseLineTo', ut
     { $unwind: '$data' },
     { $match: { 'data.year': { $gte : req.fromYear, $lte: req.toYear } } },
     (err, obs) => {
-      if (err) util.handleError({ status: 400, body: `No observation found for ${req.name}` });
+      if (err) util.handleError({ status: 400, body: `No observation found for ${req.name}` }, res);
       else {
         const formatted = obs.map(o => o.data);
         const result = observationBaseline(req.baseLineFrom, req.baseLineTo, formatted);
-        res.json(formatted);
+        res.json(result);
       }
     });
 });
 
 router.get('/models/:name', (req, res, next) => {
   models.model.findOne({ name: req.name }, (err, obs) => {
-    if (err) util.handleError({ status: 400, message: `No model found for ${req.name}` });
+    if (err) util.handleError({ status: 400, message: 'error reading from database' });
     if (obs) res.json(obs.data);
-    else res.json([]);
+    else util.handleError({ status: 400, body: `No observation found for ${req.name}` }, res);
   });
 });
 
@@ -107,7 +107,7 @@ router.get('/models/:name/:fromYear', (req, res, next) => {
     { $unwind : '$data' },
     { $match : { 'data.year': { $gte: req.fromYear } } },
     (err, mod) => {
-      if (err) util.handleError({ status: 400, body: `No observation found for ${req.name}` });
+      if (err) util.handleError({ status: 400, body: `No observation found for ${req.name}` }, res);
       else res.json(mod.map((e) => e.data));
     });
 });
@@ -120,7 +120,7 @@ router.get('/models/:name/:fromYear/:toYear', util.checkYear, (req, res, next) =
     { $unwind: '$data' },
     { $match: { 'data.year': { $gte : req.fromYear, $lte: req.toYear } } },
     (err, mod) => {
-      if (err) util.handleError({ status: 400, body: `No model found for ${req.name}` });
+      if (err) util.handleError({ status: 400, body: `No model found for ${req.name}` }, res);
       else {
         const formatted = mod.map(m => m.data);
         const result = getBounds(upperBound, lowerBound, formatted);
@@ -137,7 +137,7 @@ router.get('/models/:name/:fromYear/:toYear/:baseLineFrom/:baseLineTo', util.che
     { $unwind: '$data' },
     { $match: { 'data.year': { $gte : req.fromYear, $lte: req.toYear } } },
     (err, mod) => {
-      if (err) util.handleError({ status: 400, body: `No model found for ${req.name}` });
+      if (err) util.handleError({ status: 400, body: `No model found for ${req.name}` }, res);
       else {
         const formatted = mod.map(m => m.data);
         const baselined = modelBaseline(req.baseLineFrom, req.baseLineTo, formatted);
@@ -147,23 +147,29 @@ router.get('/models/:name/:fromYear/:toYear/:baseLineFrom/:baseLineTo', util.che
     });
 });
 
+// compute the average for each model run,
+// subtract average for each point in that run
 const modelBaseline = (from, to, data) => {
-  const total = data.reduce((acc, cur) => {
-    if (cur.year >= from && cur.year <= to) {
-      const yearTotal = cur.data.reduce((acc, cur) => acc + cur.mean, 0);
-      const yearAverage = yearTotal / cur.data.length;
-      acc += yearAverage;
+  let averages = { ...data[0].data };
+  // calculate totals
+  Object.keys(averages).forEach(x => { averages[x] = 0; });
+  data.forEach(year => {
+    if (year.year >= from && year.year <= to) {
+      year.data.forEach(x => {
+        averages[x.ensembleNumber] += x.mean;
+      });
     }
-    return acc;
-  }, 0);
-  const average = total / Math.abs(from - to);
-  return data.map(d => {
-    d.data = d.data.map(p => {
-      p.mean -= average;
-      return p;
-    });
-    return d;
   });
+  // calculate average
+  const period = Math.abs(from - to);
+  Object.keys(averages).forEach(x => { averages[x] = averages[x] / period; });
+  // subtract average
+  data.forEach(year => {
+    year.data.forEach(x => {
+      x.mean -= averages[x.ensembleNumber];
+    });
+  });
+  return data;
 };
 
 const observationBaseline = (from, to, data) => {
@@ -182,7 +188,7 @@ const observationBaseline = (from, to, data) => {
 
 const getBounds = (upperBound, lowerBound, data) => {
   let result = data;
-  if (upperBound <= 100 && lowerBound > 0) {
+  if (upperBound <= 100 && lowerBound >= 0) {
     result = result.map(m => {
       m.data = m.data.sort((a, b) => a.mean - b.mean);
       let max, min;

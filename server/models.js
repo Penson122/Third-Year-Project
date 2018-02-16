@@ -39,9 +39,9 @@ const modelSchema = new Schema({
   data: [modelDataSchema]
 });
 
-const observationModel = mongoose.model('observations', observationSchema);
+const observationModel = mongoose.models.observations || mongoose.model('observations', observationSchema);
 
-const modelModel = mongoose.model('models', modelSchema);
+const modelModel = mongoose.models.models || mongoose.model('models', modelSchema);
 
 module.exports = {
   observation: observationModel,

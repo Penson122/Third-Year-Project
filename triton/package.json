@@ -19,9 +19,13 @@
     "react-scripts": "1.1.1"
   },
   "scripts": {
+    "coverage": "react-scripts test --env=jsdom --coverage && serve -s coverage",
     "start": "react-scripts start",
     "build": "react-scripts build",
     "test": "react-scripts test --env=jsdom",
     "eject": "react-scripts eject"
+  },
+  "jest": {
+    "coverageReporters": ["html"]
   }
 }

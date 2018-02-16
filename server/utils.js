@@ -33,7 +33,10 @@ const isPositiveInteger = (n) => {
 };
 
 const handleError = (err, res) => {
-  console.error(err);
+  if (process.env.NODE_ENV !== 'test') {
+    // eslint-disable-next-line no-console
+    console.error(err);
+  }
   res.status(err.status).json({ msg: err.body });
 };
 
