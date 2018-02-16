@@ -13,7 +13,8 @@
   ],
   "env": {
     "browser" : true,
-    "jest": true
+    "jest": true,
+    "mocha": true
   },
   "globals": {
     "__DEV__"      : false,

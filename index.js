@@ -6,10 +6,15 @@ const routes = require('./server/routes.js');
 require('dotenv').config();
 
 const app = express();
-app.use(morgan('dev'));
 
 const DB_URI = process.env.MONGODB_URI;
-const port = process.env.PORT || 5000;
+const port = process.env.PORT || 0;
+
+// mPromise deprecated, use ES6 standard promises
+mongoose.promise = global.Promise;
+
+/* istanbul ignore if  */
+if (process.env.NODE_ENV !== 'test') { app.use(morgan('dev')); }
 
 app.use(express.static(path.join(__dirname, 'triton/build')));
 
@@ -26,15 +31,15 @@ app.get('*', (req, res) => {
   res.sendFile(path.join(__dirname, '/triton/build/index.html'));
 });
 
-// mPromise deprecated, use ES6 standard promises
-mongoose.promise = global.Promise;
-
 mongoose.connect(DB_URI, { useMongoClient: true }, (err, res) => {
+  /* istanbul ignore next */
   if (err) {
+    // eslint-disable-next-line no-console
     console.error(err);
     process.exit(1);
   } else {
     if (process.env.NODE_ENV !== 'test') {
+      /* eslint-disable no-console */
       console.log('connected to database');
       console.log('triton climate tool');
       console.log('listening on port : ' + port);

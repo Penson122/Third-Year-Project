@@ -1,3 +1,5 @@
+.nyc_output
+
 node_modules
 
 triton/build
@@ -7,6 +9,8 @@ scrapers/sources
 scrapers/processed
 
 report
+
+coverage
 
 .DS_Store
 .env

@@ -7,7 +7,9 @@
     "start": "node index.js",
     "dev:start": "nodemon index.js",
     "heroku-postbuild": "cd triton && yarn --production=false && yarn run build",
-    "test": "NODE_ENV=test mocha --recursive tests --exit"
+    "test": "NODE_ENV=test jest tests --watch",
+    "ci:test": "NODE_ENV=test jest tests",
+    "coverage": "serve -s coverage"
   },
   "author": "",
   "license": "MIT",
@@ -20,6 +22,13 @@
   "devDependencies": {
     "babel-eslint": "^8.2.1",
     "chai": "^4.1.2",
-    "chai-http": "^3.0.0"
+    "chai-http": "^3.0.0",
+    "jest": "^22.2.2"
+  },
+  "jest": {
+    "collectCoverage": true,
+    "coverageDirectory": "<rootDir>/coverage",
+    "coverageReporters": ["html", "lcov"],
+    "testPathIgnorePatterns": ["/node_modules/", "/triton/"]
   }
 }
