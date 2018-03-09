@@ -161,12 +161,12 @@ const modelBaseline = (from, to, data) => {
     }
   });
   // calculate average
-  const period = Math.abs(from - to);
+  const period = (to - from) + 1;
   Object.keys(averages).forEach(x => { averages[x] = averages[x] / period; });
   // subtract average
   data.forEach(year => {
     year.data.forEach(x => {
-      x.mean -= averages[x.ensembleNumber];
+      x.mean = x.mean - averages[x.ensembleNumber];
     });
   });
   return data;
@@ -179,7 +179,8 @@ const observationBaseline = (from, to, data) => {
     }
     return acc;
   }, 0);
-  const average = total / Math.abs(from - to);
+  const period = (to - from) + 1;
+  const average = total / period;
   return data.map(d => {
     d.mean -= average;
     return d;
@@ -193,10 +194,12 @@ const getBounds = (upperBound, lowerBound, data) => {
       m.data = m.data.sort((a, b) => a.mean - b.mean);
       let max, min;
       if (upperBound) {
-        max = m.data[Math.floor(m.data.length * (upperBound / 100))];
+        const maxIndex = Math.floor(m.data.length * (upperBound / 100));
+        max = m.data[maxIndex];
       }
       if (lowerBound) {
-        min = m.data[Math.floor(m.data.length * (lowerBound / 100))];
+        const mIndex = Math.floor(m.data.length * (lowerBound / 100));
+        min = m.data[mIndex];
       }
       if (!!max && !!min) {
         m.data = [min, max];

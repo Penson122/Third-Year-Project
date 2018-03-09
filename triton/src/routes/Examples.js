@@ -28,8 +28,8 @@ const Examples = () => (
         title='Global Average Temperatures Smoothed'
         subtitle='The effect of baselining on model estimates'
         text='Baseline period of 1998-1999'
-        observationPeriod='1960/2020/1989/1999'
-        modelPeriod='1960/2030/1998/1999' />
+        observationPeriod='1960/2020/1998/1998'
+        modelPeriod='1960/2030/1998/1998' />
     </div>
   </div>
 );
