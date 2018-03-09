@@ -52,7 +52,7 @@ const routes = [
 
 const Navigation = () => (
   <Tabs style={styles.tabs}>
-    { routes.map(r => <Tab label={r.name} containerElement={r.element} />) }
+    { routes.map((r, i) => <Tab key={i} label={r.name} containerElement={r.element} />) }
   </Tabs>
 );
 
@@ -64,7 +64,7 @@ class Header extends React.Component {
           <AppBar title='TRITON' style={styles.appBar} showMenuIconButton={false}>
             <Navigation />
           </AppBar>
-          { routes.map(r => <Route path={r.path} component={r.component} />) }
+          { routes.map((r, i) => <Route key={i} path={r.path} component={r.component} />) }
         </div>
       </Router>
     );
