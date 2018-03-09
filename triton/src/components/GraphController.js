@@ -3,21 +3,37 @@ import PropTypes from 'prop-types';
 import Paper from 'material-ui/Paper';
 import DropDownMenu from 'material-ui/DropDownMenu';
 import MenuItem from 'material-ui/MenuItem';
+import Divider from 'material-ui/Divider';
+import FlatButton from 'material-ui/FlatButton';
+import 'rc-slider/assets/index.css';
+import 'rc-tooltip/assets/bootstrap.css';
+import Slider from 'rc-slider';
 
-const GraphController = ({ dataset, datasets, model, models, handlers, baselinePeriod, dataPeriod, style }) => {
+const createSliderWithTooltip = Slider.createSliderWithTooltip;
+const Range = createSliderWithTooltip(Slider.Range);
+
+const GraphController = ({ currentSeries, series, handlers, baseline, data, style }) => {
   // const { baselineChange, periodChange } = handlers;
-  const { datasetMenuHandler, modelMenuHandler } = handlers;
+  const {
+    seriesHandler,
+    seriesSelector,
+    baselineChange,
+    periodChange
+  } = handlers;
   return (
-    <Paper style={style} zDepth={2}>
+    <Paper style={style} zDepth={1}>
       <div style={{ width: '100%' }}>
-        <DropDownMenu value={dataset} onChange={datasetMenuHandler}>
-          {datasets.map((d, i) => <MenuItem value={d} primaryText={d} />)}
+        <DropDownMenu value={currentSeries} onChange={seriesHandler}>
+          {series.map((s, i) => <MenuItem key={i} value={s} primaryText={s} />)}
         </DropDownMenu>
-        <DropDownMenu value={model} onChange={modelMenuHandler}>
-          {models.map((m, i) => <MenuItem value={m} primaryText={m} />)}
-        </DropDownMenu>
+        <FlatButton label='Add Series' onClick={seriesSelector}
+        />
       </div>
-      <div style={{ width:'100%' }} />
+      <Divider />
+      <div style={{ width:'80%', marginLeft: '10%' }}>
+        <Range min={data.min} max={data.max} defaultValue={data.period} onChange={periodChange} style={{ marginTop: '3%' }} />
+        <Range min={baseline.min} max={baseline.max} defaultValue={baseline.period} onChange={baselineChange} style={{ marginTop: '3%' }} />
+      </div>
     </Paper>
   );
 };

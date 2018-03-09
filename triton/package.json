@@ -6,6 +6,8 @@
     "google-palette": "^1.0.0",
     "material-ui": "^0.20.0",
     "multi-slider": "^4.1.0",
+    "rc-slider": "^8.6.1",
+    "rc-tooltip": "^3.7.0",
     "react": "16.2.0",
     "react-dom": "16.2.0",
     "react-router-dom": "^4.1.1",

@@ -11,13 +11,22 @@ class Graphs extends React.Component {
   constructor (props) {
     super(props);
     this.state = {
-      datasets: [],
-      dataset: '',
-      models: [],
-      model: ''
+      series: [],
+      currentSeries: '',
+      baseline: {
+        period: [1961, 1999],
+        min: 1900,
+        max: 2020
+      },
+      data: {
+        period: [1900, 2017],
+        min: 1900,
+        max: 2018
+      }
     };
-    this.datasetMenuHandler = this.datasetMenuHandler.bind(this);
-    this.modelMenuHandler = this.modelMenuHandler.bind(this);
+    this.seriesHandler = this.seriesHandler.bind(this);
+    this.baselineChange = this.baselineChange.bind(this);
+    this.periodChange = this.periodChange.bind(this);
   }
 
   async componentWillMount () {
@@ -30,22 +39,32 @@ class Graphs extends React.Component {
       datasets = this.state.datasets;
       models = this.state.models;
     }
-    this.setState({ datasets, models, dataset: datasets[0], model: models[0] });
+    this.setState({ series: [...datasets, ...models], currentSeries: datasets[0] });
   }
 
-  modelMenuHandler = (e, i, v) => this.setState({ model: v });
-  datasetMenuHandler = (e, i, v) => this.setState({ dataset: v })
+  seriesHandler = (e, i, v) => this.setState({ currentSeries: v });
+  baselineChange = values => {
+    this.setState({ baseline:{ period: values, min: this.state.baseline.min, max: this.state.baseline.max } });
+  }
+  periodChange = values => {
+    this.setState({ data:{ period: values, min: this.state.data.min, max: this.state.data.max } });
+  }
 
   render () {
-    const handlers = { datasetMenuHandler: this.datasetMenuHandler, modelMenuHandler: this.modelMenuHandler };
+    const handlers = {
+      seriesHandler: this.seriesHandler,
+      modelMenuHandler: this.modelMenuHandler,
+      baselineChange: this.baselineChange,
+      periodChange: this.periodChange
+    };
     return (
       <GraphController
         style={{ float:'right', height: '30vh', width: '40vw' }}
         handlers={handlers}
-        datasets={this.state.datasets}
-        dataset={this.state.dataset}
-        models={this.state.models}
-        model={this.state.model}
+        series={this.state.series}
+        currentSeries={this.state.currentSeries}
+        baseline={this.state.baseline}
+        data={this.state.data}
       />
     );
   }
