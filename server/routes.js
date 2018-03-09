@@ -48,6 +48,22 @@ router.param('baseLineFrom', (req, res, next, baseLineFrom) => {
   }
 });
 
+router.get('/list/observations', (req, res, next) => {
+  models.observation.find().distinct('name', (err, list) => {
+    if (err) {
+      util.handleError({ status: 400, body: 'Error connecting to database' }, res);
+    } else res.json(list);
+  });
+});
+
+router.get('/list/models', (req, res, next) => {
+  models.model.find().distinct('name', (err, list) => {
+    if (err) {
+      util.handleError({ status: 400, body: 'Error connecting to database' }, res);
+    } else res.json(list);
+  });
+});
+
 router.get('/observations/:name', (req, res, next) => {
   models.observation.findOne({ name : req.name }, (err, obs) => {
     if (err) util.handleError({ status: 400, message: `Error reading from database` });
