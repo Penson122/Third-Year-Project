@@ -17,6 +17,21 @@ const dataKeys = [
   'upperBoundCombinedAll'
 ];
 
+// describe('List', () => {
+//   it('Get list of observations', async () => {
+//     const res = await chai.request(App).get('/api/list/observations');
+//     expect(res.status).toEqual(200);
+//     expect(Array.isArray(res.body)).toBeTruthy();
+//     expect(res.body.length).toEqual(4);
+//   });
+//   it('Get list of models', async () => {
+//     const res = await chai.request(App).get('/api/list/models');
+//     expect(res.status).toEqual(200);
+//     expect(Array.isArray(res.body)).toBeTruthy();
+//     expect(res.body.length).toEqual(1);
+//   });
+// });
+
 describe('Observations', () => {
   const name = 'hadcrut4Annual';
   it('Get observation by name', async () => {
