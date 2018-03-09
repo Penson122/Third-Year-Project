@@ -26,12 +26,33 @@ const styles = {
   },
 };
 
+const routes = [
+  {
+    name: 'About',
+    path: '/about',
+    element: <Link to='/about' />,
+    component: About
+  }, {
+    name: 'Examples',
+    path: '/examples',
+    element: <Link to='/examples' />,
+    component: Examples
+  }, {
+    name: 'Graphs',
+    path: '/graphs',
+    element: <Link to='/graphs' />,
+    component: Graphs
+  }, {
+    name: 'Resources',
+    path: '/resources',
+    element: <Link to='/resources' />,
+    component: Resources
+  }
+];
+
 const Navigation = () => (
   <Tabs style={styles.tabs}>
-    <Tab label='About' containerElement={<Link to='/about' />} />
-    <Tab label='Examples' containerElement={<Link to='/examples' />} />
-    <Tab label='Graphs' containerElement={<Link to='/graphs' />} />
-    <Tab label='Resources' containerElement={<Link to='/resources' />} />
+    { routes.map(r => <Tab label={r.name} containerElement={r.element} />) }
   </Tabs>
 );
 
@@ -43,10 +64,7 @@ class Header extends React.Component {
           <AppBar title='TRITON' style={styles.appBar} showMenuIconButton={false}>
             <Navigation />
           </AppBar>
-          <Route path='/about' component={About} />
-          <Route path='/examples' component={Examples} />
-          <Route path='/graphs' component={Graphs} />
-          <Route path='/resources' component={Resources} />
+          { routes.map(r => <Route path={r.path} component={r.component} />) }
         </div>
       </Router>
     );
