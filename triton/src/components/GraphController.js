@@ -12,34 +12,51 @@ import Slider from 'rc-slider';
 const createSliderWithTooltip = Slider.createSliderWithTooltip;
 const Range = createSliderWithTooltip(Slider.Range);
 
-const GraphController = ({ currentSeries, series, handlers, baseline, data, style }) => {
-  // const { baselineChange, periodChange } = handlers;
+const GraphController = ({ currentSeries, currentModel, series, models, handlers, baseline, data, style }) => {
   const {
     seriesHandler,
     seriesSelector,
-    baselineChange,
+    modelHandler,
+    modelSelector,
     periodChange
   } = handlers;
   return (
     <Paper style={style} zDepth={1}>
-      <div style={{ width: '100%' }}>
+      <div style={{ width: '100%', display: 'flex', alignItems: 'center' }}>
         <DropDownMenu value={currentSeries} onChange={seriesHandler}>
           {series.map((s, i) => <MenuItem key={i} value={s} primaryText={s} />)}
         </DropDownMenu>
-        <FlatButton label='Add Series' onClick={seriesSelector}
+        <FlatButton label='Add Series' onClick={seriesSelector} />
+        <DropDownMenu value={currentModel} onChange={modelHandler}>
+          {models.map((s, i) => <MenuItem key={i} value={s} primaryText={s} />)}
+        </DropDownMenu>
+        <FlatButton label='Add Model' onClick={modelSelector} />
+      </div>
+      <Divider />
+      <div style={{ width:'80%', margin: '2% 10% 2% 5%' }}>
+        <Range
+          allowCross={false}
+          min={data.min}
+          max={data.max}
+          defaultValue={data.period}
+          onChange={periodChange}
+          style={{ marginTop: '3%' }}
         />
       </div>
       <Divider />
-      <div style={{ width:'80%', marginLeft: '10%' }}>
-        <Range min={data.min} max={data.max} defaultValue={data.period} onChange={periodChange} style={{ marginTop: '3%' }} />
-        <Range min={baseline.min} max={baseline.max} defaultValue={baseline.period} onChange={baselineChange} style={{ marginTop: '3%' }} />
-      </div>
     </Paper>
   );
 };
 
 GraphController.propTypes = {
-  datasets: PropTypes.arrayOf(PropTypes.string)
+  currentSeries: PropTypes.string.isRequired,
+  currentModel: PropTypes.string.isRequired,
+  series: PropTypes.arrayOf(PropTypes.string),
+  models: PropTypes.arrayOf(PropTypes.string),
+  handlers: PropTypes.object,
+  baseline: PropTypes.object,
+  data: PropTypes.object,
+  style: PropTypes.object
 };
 
 export default GraphController;
