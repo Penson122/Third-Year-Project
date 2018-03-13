@@ -28,7 +28,13 @@
   "jest": {
     "collectCoverage": true,
     "coverageDirectory": "<rootDir>/coverage",
-    "coverageReporters": ["html", "lcov"],
-    "testPathIgnorePatterns": ["/node_modules/", "/triton/"]
+    "coverageReporters": [
+      "html",
+      "lcov"
+    ],
+    "testPathIgnorePatterns": [
+      "/node_modules/",
+      "/triton/"
+    ]
   }
 }

@@ -1,7 +1,8 @@
 import React from 'react';
 import PropTypes from 'prop-types';
 import Graph from '../components/Graph';
-
+import { Area, Line } from 'recharts';
+import palette from 'google-palette';
 const styles = {
   card: {
     margin: '1% 3%',
@@ -38,6 +39,8 @@ class ExampleGraph extends React.Component {
   constructor (props) {
     super(props);
     this.state = {
+      series: [],
+      colors: palette('tol', 4),
       chart: {
         minHeight: '40vh',
         xAxisKey: 'year',
@@ -49,7 +52,7 @@ class ExampleGraph extends React.Component {
       }
     };
   }
-  async componentWillMount () {
+  async componentDidMount () {
     let hadCrutMeans = await getDataset(`/api/observations/hadcrut4Annual/${this.props.observationPeriod}`);
     let cowtanMeans = await getDataset(`/api/observations/cowtan/${this.props.observationPeriod}`);
     let modelMeans =
@@ -75,7 +78,31 @@ class ExampleGraph extends React.Component {
         config={this.state.chart}
         series={this.state.series}
         description={this.props.text}
-      />
+      >
+        <Area
+          isAnimationActive={false}
+          type='linear'
+          name={this.state.chart.seriesDetails[0].name}
+          dataKey={this.state.chart.seriesDetails[0].key}
+          fill={`#${this.state.colors[0]}`}
+          stroke={`#${this.state.colors[0]}`}
+        />
+        {
+          this.state.chart.seriesDetails.slice(1).map((x, i) => (
+            <Line
+              key={i}
+              dot={false}
+              activeDot
+              isAnimationActive={false}
+              type='linear'
+              name={x.name}
+              dataKey={x.key}
+              stroke={`#${this.state.colors[i + 1]}`}
+              strokeWidth={2}
+            />
+          ))
+        }
+      </Graph>
     );
   }
 }
