@@ -23,7 +23,7 @@ describe('List', () => {
     const res = await chai.request(App).get('/api/list/observations');
     expect(res.status).toEqual(200);
     expect(Array.isArray(res.body)).toBeTruthy();
-    expect(res.body.length).toEqual(4);
+    expect(res.body.length).toEqual(3);
   });
   it('Get list of models', async () => {
     expect.assertions(3);
