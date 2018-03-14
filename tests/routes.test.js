@@ -1,7 +1,7 @@
 const chai = require('chai');
 chai.use(require('chai-http'));
 const { App } = require('../index.js');
-
+require('dotenv').config();
 const dataKeys = [
   'year',
   'mean',
@@ -16,6 +16,23 @@ const dataKeys = [
   'lowerBoundCombinedAll',
   'upperBoundCombinedAll'
 ];
+
+describe('List', () => {
+  it('Get list of observations', async () => {
+    expect.assertions(3);
+    const res = await chai.request(App).get('/api/list/observations');
+    expect(res.status).toEqual(200);
+    expect(Array.isArray(res.body)).toBeTruthy();
+    expect(res.body.length).toEqual(3);
+  });
+  it('Get list of models', async () => {
+    expect.assertions(3);
+    const res = await chai.request(App).get('/api/list/models');
+    expect(res.status).toEqual(200);
+    expect(Array.isArray(res.body)).toBeTruthy();
+    expect(res.body.length).toEqual(1);
+  });
+});
 
 describe('Observations', () => {
   const name = 'hadcrut4Annual';
@@ -78,6 +95,14 @@ describe('Observations', () => {
     expect(res.body[0].year).toEqual(1900);
     expect(Object.keys(res.body[0]).sort()).toEqual(dataKeys.sort());
   });
+  it('Get observation with data period and baselined', async () => {
+    expect.assertions(4);
+    const res = await chai.request(App).get(`/api/observations/${name}/1900/2000/1900/1900`);
+    expect(res.status).toEqual(200);
+    expect(Array.isArray(res.body)).toBeTruthy();
+    expect(res.body[0].year).toEqual(1900);
+    expect(res.body[0].mean).toEqual(0);
+  });
 });
 
 describe('Models', () => {
@@ -118,6 +143,17 @@ describe('Models', () => {
     expect(Array.isArray(res.body)).toBeTruthy();
     expect(res.body[0].year).toEqual(fromYear);
     expect(res.body[res.body.length - 1].year).toEqual(toYear);
+  });
+  it('Get model with boundaries', async () => {
+    expect.assertions(60);
+    const fromYear = 1960;
+    const toYear = 2018;
+    const res = await chai.request(App)
+      .get(`/api/models/${modelName}/${fromYear}/${toYear}?upperBound=95&lowerBound=5`);
+    expect(Array.isArray(res.body)).toBeTruthy();
+    res.body.forEach(x => {
+      expect(x.data.length).toEqual(2);
+    });
   });
 });
 

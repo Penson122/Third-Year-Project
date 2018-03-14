@@ -2,7 +2,7 @@ import React from 'react';
 import { shallow, mount } from 'enzyme';
 import Test from './Test';
 import Graph from './Graph';
-import { ComposedChart } from 'recharts';
+import { ComposedChart, Line } from 'recharts';
 import { Card, CardActions, CardMedia, CardTitle, CardText } from 'material-ui/Card';
 import FlatButton from 'material-ui/FlatButton';
 
@@ -20,13 +20,19 @@ const baseConfig = {
 
 describe('Graph', () => {
   it('Renders without Config', () => {
-    const wrapper = shallow(<Graph title='' config={baseConfig} />);
+    const wrapper = shallow(
+      <Graph title='' config={baseConfig}>
+        <Line />
+      </Graph>
+    );
     expect(wrapper.find(ComposedChart)).toHaveLength(1);
   });
   it('Renders Card Components', () => {
     const wrapper = mount(
       <Test>
-        <Graph title='' config={baseConfig} />
+        <Graph title='' config={baseConfig}>
+          <Line />
+        </Graph>
       </Test>);
     expect(wrapper.find(Card)).toHaveLength(1);
     expect(wrapper.find(CardActions)).toHaveLength(1);
@@ -36,7 +42,12 @@ describe('Graph', () => {
     expect(wrapper.find(FlatButton)).toHaveLength(0);
   });
   it('Adds Actions', () => {
-    const wrapper = mount(<Test><Graph title='' config={baseConfig} actions={actions} /></Test>);
+    const wrapper = mount(
+      <Test>
+        <Graph title='' config={baseConfig} actions={actions}>
+          <Line />
+        </Graph>
+      </Test>);
     expect(wrapper.find(FlatButton)).toHaveLength(actions.length);
   });
 });
