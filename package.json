@@ -9,6 +9,7 @@
     "heroku-postbuild": "cd triton && yarn --production=false && yarn run build",
     "test": "NODE_ENV=test jest tests --watch",
     "ci:test": "NODE_ENV=test jest tests",
+    "docs": "jsdoc -c jsdoc-config.json -R README.md -d docs -r . && serve -s docs",
     "coverage": "serve -s coverage"
   },
   "author": "",
@@ -23,7 +24,9 @@
     "babel-eslint": "^8.2.1",
     "chai": "^4.1.2",
     "chai-http": "^3.0.0",
-    "jest": "^22.2.2"
+    "jest": "^22.2.2",
+    "jsdoc": "^3.5.5",
+    "jsdoc-route-plugin": "^0.1.0"
   },
   "jest": {
     "collectCoverage": true,
