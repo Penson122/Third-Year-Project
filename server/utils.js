@@ -1,3 +1,11 @@
+/** @module Routes */
+/**
+ * Middleware to check the from and years of a request
+ * Years must be positive numbers in chronological order in YYYY format.
+ * @name checkYear
+ * @routeparam {Number} toYear   YYYY format
+ * @routeparam {Number} fromYear YYYY format
+ */
 const checkYear = (req, res, next) => {
   let message = { errors: [] };
   let status;
@@ -28,10 +36,20 @@ const checkYear = (req, res, next) => {
   }
 };
 
+/**
+ * Utility function for checking if it's a positive number
+ * @param   {Number}  n Number to check
+ * @returns {boolean} true if it is, false otherwise
+ */
 const isPositiveInteger = (n) => {
   return n % (!isNaN(parseFloat(n)) && ~~n >= 0) === 0;
 };
 
+/**
+ * Log the error and send it to the client
+ * @param {Object}   err error to send to client
+ * @param {Response} res the express response
+ */
 const handleError = (err, res) => {
   if (process.env.NODE_ENV !== 'test') {
     // eslint-disable-next-line no-console
