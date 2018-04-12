@@ -239,7 +239,7 @@ class Graphs extends React.Component {
               <Area
                 key={x.name}
                 fill={`#${this.state.modelColors[i]}`}
-                stroke={`#${this.state.modelColors[i + 1]}`}
+                stroke={`#${this.state.modelColors[i]}`}
                 isAnimationActive={false}
                 type='linear'
                 name={x.name}
@@ -252,7 +252,7 @@ class Graphs extends React.Component {
               <Line
                 key={i}
                 dot={false}
-                stroke={`#${this.state.seriesColors[i]}`}
+                stroke={`#${this.state.seriesColors[i + 1]}`}
                 activeDot
                 isAnimationActive={false}
                 type='linear'
