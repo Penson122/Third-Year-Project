@@ -8,11 +8,14 @@ import FlatButton from 'material-ui/FlatButton';
 import 'rc-slider/assets/index.css';
 import 'rc-tooltip/assets/bootstrap.css';
 import Slider from 'rc-slider';
-
+import './GraphController.css';
 const createSliderWithTooltip = Slider.createSliderWithTooltip;
 const Range = createSliderWithTooltip(Slider.Range);
 
-const GraphController = ({ currentSeries, currentModel, series, models, handlers, baseline, data, style }) => {
+const GraphController = ({
+  trackColor, currentSeries, currentModel, series,
+  models, handlers, baseline, data, style, children
+}) => {
   const {
     seriesHandler,
     seriesSelector,
@@ -41,14 +44,17 @@ const GraphController = ({ currentSeries, currentModel, series, models, handlers
           defaultValue={data.period}
           onChange={periodChange}
           style={{ marginTop: '3%' }}
+          trackStyle={[{}, { backgroundColor: trackColor }, {}]}
         />
       </div>
       <Divider />
+      { children }
     </Paper>
   );
 };
 
 GraphController.propTypes = {
+  trackColor: PropTypes.string.isRequired,
   currentSeries: PropTypes.string.isRequired,
   currentModel: PropTypes.string.isRequired,
   series: PropTypes.arrayOf(PropTypes.string),

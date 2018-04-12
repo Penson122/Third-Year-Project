@@ -2,15 +2,19 @@ import React from 'react';
 import Graph from '../components/Graph';
 import { Area, Line } from 'recharts';
 import GraphController from '../components/GraphController';
+import ErrorWarning from '../components/ErrorWarning';
 import palette from 'google-palette';
 
 const greenToRed = (percent) => {
-  const r = percent < 50 ? 255 : Math.floor(255 - (percent * 2 - 100) * 255 / 100);
-  const g = percent > 50 ? 255 : Math.floor((percent * 2) * 255 / 100);
+  const r = percent < 50
+    ? 255 : Math.floor(255 - (percent * 2 - 100) * 255 / 100);
+  const g = percent > 50
+    ? 255 : Math.floor((percent * 2) * 255 / 100);
   return 'rgb(' + r + ',' + g + ',0)';
 };
 
-const get = async (type, item, periodStart, periodEnd, baselineStart, baselineEnd, addend = '') => {
+const get = async (type, item, periodStart, periodEnd,
+  baselineStart, baselineEnd, addend = '') => {
   let dataset = await fetch('/api/' +
   type + '/' +
   item + '/' +
@@ -29,8 +33,9 @@ const getList = async (type) => {
 class Graphs extends React.Component {
   constructor (props) {
     super(props);
-    console.log(greenToRed(0));
     this.state = {
+      error: '',
+      trackColor: greenToRed(100),
       modelColors: palette('tol-dv', 5),
       seriesColors: palette('tol', 5),
       timeoute: null,
@@ -69,7 +74,12 @@ class Graphs extends React.Component {
       datasets = this.state.datasets;
       models = this.state.models;
     }
-    this.setState({ serieNames: datasets, modelNames: models, currentSeries: datasets[0], currentModel: models[0] });
+    this.setState({
+      serieNames: datasets,
+      modelNames: models,
+      currentSeries: datasets[0],
+      currentModel: models[0]
+    });
   }
   seriesHandler = (e, i, v) => this.setState({ currentSeries: v });
   modelHandler = (e, i, v) => this.setState({ currentModel: v });
@@ -77,7 +87,8 @@ class Graphs extends React.Component {
     const { data } = this.state;
     this.state.seriesDetails.map(async x => {
       const serie = await
-        get('observations', x.name, data.period[0], data.period[3], data.period[1], data.period[2]);
+        get('observations', x.name, data.period[0], data.period[3],
+          data.period[1], data.period[2]);
       const series = serie.map((s, i) => {
         const found = this.state.series.find(se => se.year === s.year);
         let res = {};
@@ -93,8 +104,9 @@ class Graphs extends React.Component {
       this.setState({ series: series });
     });
     this.state.modelDetails.map(async x => {
-      const model = await get('models', x.name, data.period[0], data.period[3], data.period[1],
-        data.period[2], '?upperBound=95&lowerBound=5');
+      const model = await get('models', x.name, data.period[0],
+        data.period[3], data.period[1], data.period[2],
+        '?upperBound=95&lowerBound=5');
       const series = model.map((m, i) => {
         const found = this.state.series.find(se => se.year === m.year);
         let res = {};
@@ -132,16 +144,19 @@ class Graphs extends React.Component {
       const newSeries = await get('observations', currentSeries, data.period[0],
         data.period[3], data.period[1], data.period[2]);
 
-      if (!this.state.seriesDetails.find(x => x.key === `${currentSeries}Mean`)) {
+      if (!this.state.seriesDetails
+        .find(x => x.key === `${currentSeries}Mean`)) {
         this.setState({
           seriesDetails: [{ name: currentSeries, key: `${currentSeries}Mean` },
             ...this.state.seriesDetails]
         });
       }
-      const largestDataset = newSeries.length < this.state.series.length ? this.state.series : newSeries;
+      const largestDataset = newSeries.length < this.state.series.length
+        ? this.state.series : newSeries;
       const series = largestDataset.map((x, i) => {
         let res = this.state.series[i] ? { ...this.state.series[i] } : {};
-        res['year'] = this.state.series[i] ? this.state.series[i].year : newSeries[i].year;
+        res['year'] = this.state.series[i]
+          ? this.state.series[i].year : newSeries[i].year;
         if (newSeries[i]) res[`${currentSeries}Mean`] = newSeries[i].mean;
         return res;
       });
@@ -153,20 +168,29 @@ class Graphs extends React.Component {
   modelSelector = async () => {
     const { currentModel, data } = this.state;
     try {
-      const newModel = await get('models', currentModel, data.period[0], data.period[3], data.period[1],
+      const newModel = await get('models',
+        currentModel, data.period[0], data.period[3], data.period[1],
         data.period[2], '?upperBound=95&lowerBound=5');
-      if (!this.state.modelDetails.find(x => x.key === `${currentModel}Range`)) {
+      if (!this.state.modelDetails
+        .find(x => x.key === `${currentModel}Range`)) {
         this.setState({
-          modelDetails: [{ name: currentModel, key: `${currentModel}Range` }, ...this.state.modelDetails]
+          modelDetails: [{
+            name: currentModel,
+            key: `${currentModel}Range`
+          }, ...this.state.modelDetails]
         });
       }
 
-      const largestDataset = newModel.length < this.state.series.length ? this.state.series : newModel;
+      const largestDataset = newModel.length < this.state.series.length
+        ? this.state.series : newModel;
       this.setState({
         series: largestDataset.map((x, i) => {
           let res = this.state.series[i] ? { ...this.state.series[i] } : {};
-          res['year'] = this.state.series[i] ? this.state.series[i].year : newModel[i].year;
-          res[`${currentModel}Range`] = [newModel[i].data[0].mean, newModel[i].data[1].mean];
+          res['year'] = this.state.series[i]
+            ? this.state.series[i].year : newModel[i].year;
+          res[`${currentModel}Range`] = [
+            newModel[i].data[0].mean, newModel[i].data[1].mean
+          ];
           return res;
         })
       });
@@ -174,11 +198,22 @@ class Graphs extends React.Component {
       // TODO: deal with errors
     }
   }
+  calculatePercent = (a, b) => {
+    return Math.floor((a - b) / 30 * 100);
+  }
   periodChange = values => {
     if (this.state.pTimeout) clearTimeout(this.state.pTimeout);
     const timeout = setTimeout(this.rebaseline, 500);
+    const p = this.calculatePercent(values[2], values[1]);
+    const e = p < 40 ? 'Low baselines skew data' : '';
     this.setState({
-      data: { period: values, min: this.state.data.min, max: this.state.data.max },
+      trackColor: greenToRed(p),
+      error: e,
+      data: {
+        period: values,
+        min: this.state.data.min,
+        max: this.state.data.max
+      },
       pTimeout: timeout
     });
   }
@@ -229,7 +264,13 @@ class Graphs extends React.Component {
           }
         </Graph>
         <GraphController
-          style={{ float:'right', height: '30vh', width: '38vw', margingRight: '2%' }}
+          trackColor={this.state.trackColor}
+          style={{
+            float:'right',
+            height: '30vh',
+            width: '38vw',
+            margingRight: '2%'
+          }}
           handlers={handlers}
           series={this.state.serieNames}
           models={this.state.modelNames}
@@ -237,7 +278,10 @@ class Graphs extends React.Component {
           currentSeries={this.state.currentSeries}
           baseline={this.state.baseline}
           data={this.state.data}
-        />
+        >
+          {this.state.error.length === 0
+            ? null : <ErrorWarning text={this.state.error} />}
+        </GraphController>
       </div>
     );
   }
