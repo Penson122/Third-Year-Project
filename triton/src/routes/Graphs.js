@@ -42,10 +42,11 @@ class Graphs extends React.Component {
       series: [],
       serieNames: [],
       modelNames: [],
+      chips: [],
       currentSeries: '',
       currentModel: '',
       data: {
-        period: [1900, 1961, 1999, 2030], // move baseline into period
+        period: [1950, 1961, 1999, 2030], // move baseline into period
         min: 1900,
         max: 2030
       },
@@ -62,6 +63,7 @@ class Graphs extends React.Component {
     this.modelHandler = this.modelHandler.bind(this);
     this.modelSelector = this.modelSelector.bind(this);
     this.rebaseline = this.rebaseline.bind(this);
+    this.removeChip = this.removeChip.bind(this);
   }
 
   async componentWillMount () {
@@ -75,14 +77,28 @@ class Graphs extends React.Component {
       models = this.state.models;
     }
     this.setState({
-      serieNames: datasets,
+      serieNames: datasets.slice(0),
       modelNames: models,
       currentSeries: datasets[0],
       currentModel: models[0]
     });
+    this.seriesSelector();
+    this.modelSelector();
   }
+
+  removeChip = (chip) => {
+    const isSeries = this.state.serieNames.find(s => s === chip);
+    const dataKey = isSeries ? `${chip}Mean` : `${chip}Range`;
+    this.removeDataset(dataKey);
+    this.setState({
+      chips: this.state.chips.filter(s => s !== chip)
+    });
+  }
+
   seriesHandler = (e, i, v) => this.setState({ currentSeries: v });
+
   modelHandler = (e, i, v) => this.setState({ currentModel: v });
+
   rebaseline = () => {
     const { data } = this.state;
     this.state.seriesDetails.map(async x => {
@@ -138,14 +154,24 @@ class Graphs extends React.Component {
       })
     });
   }
+
+  removeDataset = (name) => {
+    const series = this.state.series.map(s => {
+      delete s[name];
+      return s;
+    });
+    this.rebaseline();
+    this.setState({ series: series });
+  }
+
   seriesSelector = async () => {
     const { currentSeries, data } = this.state;
     try {
       const newSeries = await get('observations', currentSeries, data.period[0],
         data.period[3], data.period[1], data.period[2]);
-
-      if (!this.state.seriesDetails
-        .find(x => x.key === `${currentSeries}Mean`)) {
+      const found = this.state.seriesDetails
+        .find(x => x.key === `${currentSeries}Mean`);
+      if (!found) {
         this.setState({
           seriesDetails: [{ name: currentSeries, key: `${currentSeries}Mean` },
             ...this.state.seriesDetails]
@@ -160,7 +186,10 @@ class Graphs extends React.Component {
         if (newSeries[i]) res[`${currentSeries}Mean`] = newSeries[i].mean;
         return res;
       });
-      this.setState({ series: series });
+      this.setState({
+        series: series,
+        chips: [currentSeries, ...this.state.chips]
+      });
     } catch (e) {
       // TODO: deal with errors
     }
@@ -183,16 +212,18 @@ class Graphs extends React.Component {
 
       const largestDataset = newModel.length < this.state.series.length
         ? this.state.series : newModel;
+      const series = largestDataset.map((x, i) => {
+        let res = this.state.series[i] ? { ...this.state.series[i] } : {};
+        res['year'] = this.state.series[i]
+          ? this.state.series[i].year : newModel[i].year;
+        res[`${currentModel}Range`] = [
+          newModel[i].data[0].mean, newModel[i].data[1].mean
+        ];
+        return res;
+      });
       this.setState({
-        series: largestDataset.map((x, i) => {
-          let res = this.state.series[i] ? { ...this.state.series[i] } : {};
-          res['year'] = this.state.series[i]
-            ? this.state.series[i].year : newModel[i].year;
-          res[`${currentModel}Range`] = [
-            newModel[i].data[0].mean, newModel[i].data[1].mean
-          ];
-          return res;
-        })
+        series: series,
+        chips: [currentModel, ...this.state.chips]
       });
     } catch (e) {
       // TODO: deal with errors
@@ -225,11 +256,12 @@ class Graphs extends React.Component {
       modelHandler: this.modelHandler,
       modelSelector: this.modelSelector,
       periodChange: this.periodChange,
+      removeChip: this.removeChip
     };
     return (
       <div>
         <Graph
-          styles={{ float: 'left', width: '60vw' }}
+          styles={{ float: 'left', width: '55vw', margin: '1em 0 0 1em' }}
           title='Select Series to add to Graph'
           series={this.state.series}
           config={this.state.chart}
@@ -239,7 +271,7 @@ class Graphs extends React.Component {
               <Area
                 key={x.name}
                 fill={`#${this.state.modelColors[i]}`}
-                stroke={`#${this.state.modelColors[i + 1]}`}
+                stroke={`#${this.state.modelColors[i]}`}
                 isAnimationActive={false}
                 type='linear'
                 name={x.name}
@@ -252,7 +284,7 @@ class Graphs extends React.Component {
               <Line
                 key={i}
                 dot={false}
-                stroke={`#${this.state.seriesColors[i]}`}
+                stroke={`#${this.state.seriesColors[i + 1]}`}
                 activeDot
                 isAnimationActive={false}
                 type='linear'
@@ -267,16 +299,16 @@ class Graphs extends React.Component {
           trackColor={this.state.trackColor}
           style={{
             float:'right',
-            height: '30vh',
-            width: '38vw',
-            margingRight: '2%'
+            height: '70vh',
+            width: '40vw',
+            margin: '1em 1em 0 0'
           }}
           handlers={handlers}
           series={this.state.serieNames}
           models={this.state.modelNames}
+          chips={this.state.chips}
           currentModel={this.state.currentModel}
           currentSeries={this.state.currentSeries}
-          baseline={this.state.baseline}
           data={this.state.data}
         >
           {this.state.error.length === 0
