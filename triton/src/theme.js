@@ -1,5 +1,8 @@
 // material UI themes
-import { green500, green700, grey400, yellowA200, yellow300, yellowA400 } from 'material-ui/styles/colors';
+import {
+  green500, green700, grey400,
+  yellowA200, yellow300, yellowA400
+} from 'material-ui/styles/colors';
 import getMuiTheme from 'material-ui/styles/getMuiTheme';
 
 export const muiTheme = getMuiTheme({

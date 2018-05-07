@@ -3,10 +3,14 @@ import { shallow, mount } from 'enzyme';
 import Test from './Test';
 import Graph from './Graph';
 import { ComposedChart, Line } from 'recharts';
-import { Card, CardActions, CardMedia, CardTitle, CardText } from 'material-ui/Card';
+import { Card, CardActions, CardMedia, CardTitle, CardText }
+  from 'material-ui/Card';
 import FlatButton from 'material-ui/FlatButton';
 
-const actions = [{ label: 'a', href: 'https://tritonclimatetools.herokuapp.com' }, { label: 'b', href: 'abc.com' }];
+const actions = [
+  { label: 'a', href: 'https://tritonclimatetools.herokuapp.com' },
+  { label: 'b', href: 'abc.com' }
+];
 
 const baseConfig = {
   minHeight: '100',
