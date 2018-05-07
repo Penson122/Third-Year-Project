@@ -34,9 +34,16 @@ formattedData = []
 for item in cmipData:
     found = list(filter(lambda x: x['year'] == item['year'], formattedData))
     if(len(found) == 0):
-        formattedData.append({ "year": item['year'], "data": [{ "ensembleNumber": item['ensembleNumber'], "mean": item['mean'] }] })
+        formattedData.append({
+            "year": item['year'],
+            "data": [{
+                "ensembleNumber": item['ensembleNumber'], "mean": item['mean']
+            }]
+        })
     else:
-        found[0]['data'].append({ "ensembleNumber": item['ensembleNumber'], "mean": item['mean'] })
+        found[0]['data'].append({
+            "ensembleNumber": item['ensembleNumber'], "mean": item['mean']
+        })
 
 output['data'] = formattedData
 

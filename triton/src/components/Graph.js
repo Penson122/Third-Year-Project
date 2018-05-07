@@ -1,11 +1,24 @@
 import React from 'react';
 import PropTypes from 'prop-types';
 import stylePropType from 'react-style-proptype';
-import { ResponsiveContainer, ComposedChart, XAxis, YAxis, CartesianGrid, Tooltip, Legend } from 'recharts';
-import { Card, CardActions, CardMedia, CardTitle, CardText } from 'material-ui/Card';
+import {
+  ResponsiveContainer,
+  ComposedChart,
+  XAxis,
+  YAxis,
+  CartesianGrid,
+  Tooltip,
+  Legend } from 'recharts';
+import {
+  Card,
+  CardActions,
+  CardMedia,
+  CardTitle,
+  CardText } from 'material-ui/Card';
 import FlatButton from 'material-ui/FlatButton';
 
-const Graph = ({ styles, title, subtitle, config, series = [], description, actions = [], children }) => {
+const Graph = ({ styles, title, subtitle, config, series = [],
+  description, actions = [], children }) => {
   const formatter = (a, b) => {
     let res;
     if (Array.isArray(a)) {
@@ -17,7 +30,10 @@ const Graph = ({ styles, title, subtitle, config, series = [], description, acti
   };
   return (
     <Card style={styles}>
-      <CardTitle title={title} subtitle={subtitle} />
+      <CardTitle
+        title={title}
+        subtitle={subtitle}
+        style={{ textAlign: 'center' }} />
       <CardMedia>
         <ResponsiveContainer minHeight={config.minHeight}>
           <ComposedChart data={series}
@@ -36,7 +52,8 @@ const Graph = ({ styles, title, subtitle, config, series = [], description, acti
       </CardText>
       <CardActions>
         {
-          actions.map((a, i) => <FlatButton key={i} label={a.label} href={a.href} />)
+          actions.map((a, i) =>
+            <FlatButton key={i} label={a.label} href={a.href} />)
         }
       </CardActions>
     </Card>
@@ -56,7 +73,8 @@ Graph.propTypes = ({
     PropTypes.arrayOf(PropTypes.node),
     PropTypes.node
   ]).isRequired,
-  actions: PropTypes.arrayOf(PropTypes.shape({ label: PropTypes.string.isRequired, href: PropTypes.string.isRequired }))
+  actions: PropTypes.arrayOf(PropTypes.shape(
+    { label: PropTypes.string.isRequired, href: PropTypes.string.isRequired }))
 });
 
 export default Graph;
